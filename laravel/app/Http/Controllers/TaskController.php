@@ -56,7 +56,8 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        $this->authorize('update', $task);
+        return view('tasks.edit', compact('task'));
     }
 
     /**
@@ -64,7 +65,18 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $this->authorize('update', $task);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:Pending,In Progress,Completed',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $task->update($request->all());
+
+        return redirect()->route('tasks.index')->with('success', 'Task updated.');
     }
 
     /**
@@ -72,6 +84,9 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $this->authorize('delete', $task);
+        $task->delete();
+
+        return redirect()->route('tasks.index')->with('success', 'Task deleted.');
     }
 }
